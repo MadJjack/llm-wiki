@@ -1,0 +1,56 @@
+# Agent Context — Hot Cache (per-developer, gitignored)
+
+> Personal working memory for the agent. NOT shared with the team — gitignored.
+> The agent rewrites this file at the end of every session.
+> Next session starts here — not from re-reading the entire wiki.
+> Keep it compressed and actionable. Max ~100 lines.
+>
+> First-time setup: copy this file to `.agent/context.md` and start using it.
+> Shared team truth lives in `PROGRESS.md`, the active plan/progress pair,
+> `wiki/`, and `.agent/decisions.md` — all committed.
+
+**Last updated:** <!-- YYYY-MM-DD -->
+**Session summary:** <!-- one sentence -->
+
+---
+
+## Project State
+
+<!-- 2–4 sentences describing where the project stands right now -->
+
+## Active Plan
+
+**Plan:** <!-- .agent/plans/N.name.md or "none" -->
+**Status:** <!-- what's done, what's next -->
+**Blocked on:** <!-- anything blocking, or "nothing" -->
+
+## Recently Completed
+
+<!-- bullet list of the last 2–3 things finished, with plan numbers -->
+-
+
+## Pick Up Next
+
+<!-- exactly what to do at the start of the next session -->
+1.
+
+## Recent Key Decisions
+
+<!-- decisions made in the last 1–2 sessions worth remembering -->
+-
+
+## Known Gotchas Right Now
+
+<!-- active issues, flaky tests, known broken things, temp workarounds -->
+-
+
+## Wiki Pages Modified This Session
+
+<!-- so the next session knows what's fresh -->
+-
+
+---
+
+> ⚠️ This file is always overwritten at session end — not appended.
+> Durable knowledge goes in wiki/. Durable decisions go in .agent/decisions.md.
+> This file is only a working memory cache.

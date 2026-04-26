@@ -1,0 +1,11 @@
+.env
+.DS_Store
+*.pyc
+__pycache__/
+.venv/
+node_modules/
+
+# Per-developer agent working memory.
+# Each developer keeps their own local hot cache; copy from .agent/context.md.example.
+# Shared team state lives in PROGRESS.md, the active plan/progress pair, and the wiki.
+.agent/context.md
