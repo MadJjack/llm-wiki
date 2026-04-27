@@ -107,12 +107,72 @@ status: current | stale | draft
 
 ## Getting Started
 
-1. Copy this repo into your project (or use as a GitHub template)
-2. Fill in `CONVENTIONS.md` with your stack and code style
-3. `cp .agent/context.md.example .agent/context.md` — bootstrap your local hot cache (gitignored, per-developer)
-4. Drop any existing docs into `raw/` and run: `"Ingest raw/<file>"`
-5. Ask the agent: `"Scan the repo and populate wiki/architecture/overview.md"`
-6. Start working — the agent handles the rest
+**Step 1 — File setup** (run once per clone):
+
+```bash
+bash scripts/onboard.sh
+```
+
+This copies `.agent/context.md.example` → `.agent/context.md` (your personal, gitignored agent cache) and patches `.gitignore` if needed. Safe to re-run.
+
+**Step 2 — AI kickoff** (run once per project):
+
+Run the onboarding command in your preferred agent:
+
+| Agent | How to run onboarding |
+|---|---|
+| GitHub Copilot | Open Copilot Chat and type `/wiki-onboard` |
+| Claude Code | Open Claude Code and type `/wiki-onboard` |
+| Codex / other agents | Paste the contents of `.github/prompts/wiki-onboard.prompt.md` into chat |
+
+The agent will scan your repo and populate:
+- `wiki/architecture/overview.md` — system structure and tech stack
+- `CONVENTIONS.md` — naming, patterns, and code style
+- `wiki/setup/dev-environment.md` — prerequisites and run commands
+- `wiki/data-model/_index.md` — schema and entities (if schema files exist)
+- `wiki/log.md` — operation history
+
+**Optional follow-ons:**
+- Drop existing docs into `raw/` and say: `"Ingest raw/<file>"`
+- Validate structural rules any time with `bash scripts/validate-wiki.sh`
+- Start working — the agent maintains the wiki from here
+
+---
+
+## Command Surface
+
+After onboarding, the repo exposes the same workflow names across supported agent surfaces.
+
+| Workflow | Purpose |
+|---|---|
+| `/wiki-onboard` | Bootstrap the wiki from the repository and existing docs |
+| `/wiki-lint` | Report structural and content issues in the wiki without auto-fixing |
+| `/wiki-ingest` | Compile source material from `raw/` into the wiki |
+| `/wiki-query` | Answer from the wiki first, then persist durable answers back into the wiki |
+| `/wiki-plan-new` | Create the next-numbered plan/progress pair and register it in `PROGRESS.md` |
+| `/wiki-plan-close` | Validate and close a completed plan, then archive it |
+| `/wiki-debug` | Route an error or symptom through the Symptom Index before broader scanning |
+| `/wiki-template-reset` | Maintainer-only reset that restores this repo to a publishable template baseline |
+
+Run `bash scripts/validate-wiki.sh` any time you want a structural check of:
+- required root files
+- mirror sync (`CLAUDE.md`, `AGENTS.md`, `.github/copilot-instructions.md`)
+- plan/progress pairing
+- wiki frontmatter
+- Symptom Index registration for troubleshooting and lesson pages
+
+### Agent Matrix
+
+| Workflow | GitHub Copilot | Claude Code | Codex / other agents |
+|---|---|---|---|
+| Onboard | `/wiki-onboard` | `/wiki-onboard` | Paste `.github/prompts/wiki-onboard.prompt.md` |
+| Lint the wiki | `/wiki-lint` | `/wiki-lint` | Paste `.github/prompts/wiki-lint.prompt.md` |
+| Ingest docs into the wiki | `/wiki-ingest` | `/wiki-ingest` | Paste `.github/prompts/wiki-ingest.prompt.md` |
+| Answer and persist a wiki query | `/wiki-query` | `/wiki-query` | Paste `.github/prompts/wiki-query.prompt.md` |
+| Start a new plan | `/wiki-plan-new` | `/wiki-plan-new` | Paste `.github/prompts/wiki-plan-new.prompt.md` |
+| Close an active plan | `/wiki-plan-close` | `/wiki-plan-close` | Paste `.github/prompts/wiki-plan-close.prompt.md` |
+| Debug a symptom | `/wiki-debug` | `/wiki-debug` | Paste `.github/prompts/wiki-debug.prompt.md` |
+| Reset template state | `/wiki-template-reset` | `/wiki-template-reset` | Paste `.github/prompts/wiki-template-reset.prompt.md` |
 
 ---
 
@@ -154,6 +214,44 @@ multiple authors.
 | `CLAUDE.md` | Claude Code, Claude (claude.ai) | Source of truth |
 | `AGENTS.md` | OpenAI Codex (and other agents that look for AGENTS.md) | Mirror of CLAUDE.md |
 | `.github/copilot-instructions.md` | GitHub Copilot | Mirror of CLAUDE.md |
+
+**Onboarding command locations:**
+- GitHub Copilot: `.github/prompts/wiki-onboard.prompt.md` (run `/wiki-onboard` in Copilot Chat)
+- Claude Code: `.claude/commands/wiki-onboard.md` (run `/wiki-onboard` in Claude Code)
+- Codex and other agents: use `.github/prompts/wiki-onboard.prompt.md` as the onboarding prompt text
+
+**Workflow command locations:**
+- GitHub Copilot: `.github/prompts/*.prompt.md`
+- Claude Code: `.claude/commands/*.md`
+- Codex and other agents: use the matching `.github/prompts/*.prompt.md` file as the task brief
+
+## Template Maintainer Reset
+
+This repository is both a working project and a publishable template. When template maintainers finish a round of schema or workflow work, the repo can contain tracker rows, plan artifacts, archived examples, decisions, and operation-log entries that are useful during authoring but should not ship to downstream users.
+
+Use the reset script to return the repo to a clean template baseline before publishing or cutting a fresh template snapshot:
+
+```bash
+bash scripts/reset-template-state.sh
+```
+
+The script is deterministic and idempotent. It rewrites the tracked history files back to their blank template baselines, removes non-template plan/progress artifacts including archived author examples, and preserves the archive directories for future plan closeout.
+
+You can also invoke the same reset flow through the agent wrapper command:
+
+- GitHub Copilot: `/wiki-template-reset`
+- Claude Code: `/wiki-template-reset`
+- Codex / other agents: paste `.github/prompts/wiki-template-reset.prompt.md`
+
+This is a maintainer hygiene command, not a normal day-to-day workflow. Do not use it in an active project unless you explicitly want to discard tracked template-author history.
+
+After running the reset, validate the result with:
+
+```bash
+bash scripts/validate-wiki.sh
+```
+
+Then confirm the repo has no author-specific rows left in `PROGRESS.md`, `.agent/decisions.md`, `wiki/log.md`, or archived plan/progress examples.
 
 `AGENTS.md` and `.github/copilot-instructions.md` are full mirrors of
 `CLAUDE.md` — Copilot and Codex don't follow file pointers, so each agent
