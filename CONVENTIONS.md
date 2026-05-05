@@ -80,6 +80,16 @@
 
 ---
 
+## Wiki Pages
+
+- **Atomic node size:** Keep pages between **50 and 300 lines**.
+  - Under 50 lines: the page is a stub — merge it into a related page or expand it before committing.
+  - Over 300 lines: split into atomic sub-pages with a parent `_index.md`. The validator emits a warning.
+- **One concept per file.** If a page covers pricing philosophy, monthly-vs-annual billing, the no-free-tier decision, and the LTV calculation, that is four pages, not one.
+- **Use `concept` type for durable terms** that the agent should reason from across multiple modules. Prefer individual concept pages over appending to `wiki/glossary.md`.
+
+---
+
 ## Patterns We Never Use
 
 > Anti-patterns that have burned us or that we've explicitly ruled out.

@@ -2,7 +2,7 @@
 type: pattern
 tags: [metadata, relations, trust, provenance]
 created: 2026-05-04
-updated: 2026-05-04
+updated: 2026-05-05
 status: current
 relations:
   supports: []
@@ -37,11 +37,17 @@ Add a `relations:` block to any page's YAML frontmatter. Keys must be from this 
 
 | Key | Meaning | Use when |
 |---|---|---|
-| `supports` | This page provides evidence or rationale for the target | Backing up an architectural decision with implementation proof |
-| `depends_on` | This page's claims rely on the target being true | A pattern that only works given a specific data model |
-| `supersedes` | This page replaces the target | A new pattern replaces a legacy one (mark old page `status: stale`) |
-| `contradicts` | This page conflicts with the target — review required | A lesson that invalidates prior guidance |
-| `related_to` | General non-directional association | Related-but-distinct pages that agents should read together |
+| Key | Meaning | Weight | Use when |
+|---|---|---|---|
+| `contradicts` | This page conflicts with the target — review required | 1.0 | A lesson invalidates prior guidance |
+| `derived_from` | This page was created based on target; lineage/provenance | 0.9 | A page is compiled from an ingested raw source |
+| `depends_on` | This page's claims rely on the target being true | 0.8 | A pattern that only works given a specific data model |
+| `part_of` | This page is a component of target | 0.8 | A module page that belongs to a larger system |
+| `supports` | This page provides evidence or rationale for the target | 0.7 | Backing up an architectural decision with implementation proof |
+| `supersedes` | This page replaces the target (mark old page `status: stale`) | 0.7 | A new pattern replaces a legacy one |
+| `related_to` | General non-directional topical association | 0.5 | Related-but-distinct pages that agents should read together |
+
+**Agent traversal order:** Follow weight ≥ 0.8 edges before weight < 0.8 edges. Only follow `related_to` (0.5) if higher-weight paths are exhausted.
 
 Values use `[[wikilink]]` syntax. The validator checks that targets resolve to existing files.
 
@@ -55,6 +61,19 @@ relations:
   related_to:
     - "[[patterns/clean-code-checklist]]"
 ```
+
+---
+
+## Node Types
+
+The `type:` frontmatter field classifies a page's role. The validator requires this field on every wiki page. Two types warrant special guidance:
+
+| Type | Meaning | When to use |
+|---|---|---|
+| `concept` | A defined term, framework, or principle the agent should reason from | Durable ideas that span multiple modules; prefer over growing `glossary.md` |
+| `hypothesis` | A falsifiable architectural assumption with a measurable test | Unvalidated beliefs — between a known unknown (`question`) and a resolved choice (`decision`) |
+
+All other types: `module`, `decision`, `pattern`, `integration`, `lesson`, `troubleshooting`, `architecture`, `api`, `data-model`, `setup`, `reference`.
 
 ---
 

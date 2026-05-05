@@ -260,11 +260,17 @@ validator enforces this.
 
 | Key | Meaning |
 |---|---|
-| `supports` | This page provides evidence or rationale for the target |
-| `depends_on` | This page's claims rely on the target being true |
-| `supersedes` | This page replaces the target (target should be marked stale) |
-| `contradicts` | This page conflicts with the target — review required |
-| `related_to` | General non-directional association |
+| Key | Meaning | Weight |
+|---|---|---|
+| `contradicts` | This page conflicts with the target — review required | 1.0 |
+| `derived_from` | This page was created based on target; tracks provenance/lineage | 0.9 |
+| `depends_on` | This page's claims rely on the target being true | 0.8 |
+| `part_of` | This page is a component of target | 0.8 |
+| `supports` | This page provides evidence or rationale for the target | 0.7 |
+| `supersedes` | This page replaces the target (target should be marked stale) | 0.7 |
+| `related_to` | General non-directional association | 0.5 |
+
+Weights guide agent traversal priority: follow weight ≥ 0.8 edges first; follow weight 0.5 edges only when higher-weight paths are exhausted.
 
 Use `[[wikilink]]` syntax for target values. Wikilink targets must resolve to
 existing wiki files (the validator checks this).
@@ -299,17 +305,19 @@ Every wiki page:
 
 ```markdown
 ---
-type: module | decision | pattern | integration | lesson | troubleshooting | architecture | api | data-model | setup | reference
+type: module | decision | pattern | integration | lesson | troubleshooting | architecture | api | data-model | setup | reference | concept | hypothesis
 tags: []
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 status: current | stale | draft
 relations:
-  supports: []       # [[pages]] this page substantiates
-  depends_on: []     # [[pages]] that must be true for this to be valid
-  supersedes: []     # [[pages]] this page replaces
-  contradicts: []    # [[pages]] that conflict with this
-  related_to: []     # general associations
+  supports: []       # [[pages]] this page substantiates (weight 0.7)
+  depends_on: []     # [[pages]] that must be true for this to be valid (weight 0.8)
+  supersedes: []     # [[pages]] this page replaces (weight 0.7)
+  contradicts: []    # [[pages]] that conflict with this (weight 1.0)
+  related_to: []     # general associations (weight 0.5)
+  derived_from: []   # [[pages]] this was derived/built from; provenance (weight 0.9)
+  part_of: []        # [[pages]] this is a component of (weight 0.8)
 confidence: high | medium | low | unverified
 verified_at: YYYY-MM-DD        # last confirmed by review or test
 verification_method: manual-review | automated-test | live-observation | unverified
@@ -337,6 +345,12 @@ Update `updated:` in frontmatter whenever a page is modified.
 Set `status: stale` when a page needs review but you don't have time to fix it now.
 See Rule 7 for guidance on filling `relations:` and trust metadata fields.
 
+**Atomic node size:** Keep pages between 50 and 300 lines. Pages under 50 lines are stubs — merge or expand. Pages over 300 lines should be split into atomic sub-pages with a parent index. The validator emits a warning for oversized pages.
+
+**Page types `concept` and `hypothesis`:**
+- `concept` — A defined term, framework, or principle the agent should reason from. Use for durable ideas that span multiple modules. Prefer atomic concept pages over growing `glossary.md`.
+- `hypothesis` — A falsifiable architectural assumption with a measurable test. Use for unvalidated beliefs between a `question` (known unknown) and a `decision` (choice already made).
+
 ### Troubleshooting & Lesson pages — extended format (AI-first retrieval)
 
 These two page types are the primary surface for "I've seen this before" recall.
@@ -359,6 +373,8 @@ relations:
   supersedes: []
   contradicts: []
   related_to: []
+  derived_from: []
+  part_of: []
 confidence: high | medium | low | unverified
 verified_at: YYYY-MM-DD
 verification_method: manual-review | automated-test | live-observation | unverified

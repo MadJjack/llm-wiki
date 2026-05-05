@@ -14,8 +14,11 @@ RESET='\033[0m'
 
 FAIL_COUNT=0
 
+WARN_COUNT=0
+
 pass() { echo -e "  ${GREEN}[ok]${RESET} $*"; }
 fail() { echo -e "  ${RED}[fail]${RESET} $*"; FAIL_COUNT=$((FAIL_COUNT + 1)); }
+warn() { echo -e "  ${CYAN}[warn]${RESET} $*"; WARN_COUNT=$((WARN_COUNT + 1)); }
 info() { echo -e "${CYAN}[check]${RESET} $*"; }
 
 trim_whitespace() {
@@ -687,7 +690,7 @@ check_wiki_relations() {
         line = $0
         gsub(/^[[:space:]]+/, "", line)
         sub(/:.*$/, "", line)
-        if (line != "supports" && line != "depends_on" && line != "supersedes" && line != "contradicts" && line != "related_to") {
+        if (line != "supports" && line != "depends_on" && line != "supersedes" && line != "contradicts" && line != "related_to" && line != "derived_from" && line != "part_of") {
           print line
         }
       }
@@ -695,7 +698,7 @@ check_wiki_relations() {
 
     if [ -n "$invalid_keys" ]; then
       while IFS= read -r key; do
-        fail "Invalid relation type key '$key' in $rel (allowed: supports|depends_on|supersedes|contradicts|related_to)"
+        fail "Invalid relation type key '$key' in $rel (allowed: supports|depends_on|supersedes|contradicts|related_to|derived_from|part_of)"
         section_failed=1
       done <<< "$invalid_keys"
     fi
@@ -704,6 +707,34 @@ check_wiki_relations() {
   if [ "$section_failed" -eq 0 ]; then
     pass "Wiki relation type keys are valid"
   fi
+}
+
+check_wiki_page_size() {
+  local file
+  local rel
+  local line_count
+
+  info "Checking wiki page sizes (50–300 lines)"
+
+  while IFS= read -r -d '' file; do
+    rel="${file#$REPO_ROOT/}"
+
+    case "$rel" in
+      "wiki/index.md"|"wiki/log.md"|"wiki/raw/"*|"wiki/compiled/"*)
+        continue
+        ;;
+    esac
+
+    line_count="$(wc -l < "$file")"
+
+    if [ "$line_count" -gt 300 ]; then
+      warn "$rel is $line_count lines (soft cap: 300). Consider splitting into atomic sub-pages."
+    fi
+
+    if [ "$line_count" -lt 50 ]; then
+      warn "$rel is $line_count lines (min: 50). Stubs should be merged or expanded."
+    fi
+  done < <(find "$REPO_ROOT/wiki" -type f -name "*.md" -print0)
 }
 
 check_wikilinks() {
@@ -753,13 +784,19 @@ check_wiki_trust_metadata
 check_wiki_relations
 check_symptom_index
 check_wikilinks
+check_wiki_page_size
 
 echo ""
 echo "──────────────────────────────────────"
-if [ "$FAIL_COUNT" -eq 0 ]; then
+if [ "$FAIL_COUNT" -eq 0 ] && [ "$WARN_COUNT" -eq 0 ]; then
   echo -e "${BOLD}${GREEN}Validation passed.${RESET}"
   exit 0
 fi
 
-echo -e "${BOLD}${RED}Validation failed.${RESET} ${FAIL_COUNT} issue(s) found."
+if [ "$FAIL_COUNT" -eq 0 ]; then
+  echo -e "${BOLD}${GREEN}Validation passed.${RESET} ${WARN_COUNT} warning(s)."
+  exit 0
+fi
+
+echo -e "${BOLD}${RED}Validation failed.${RESET} ${FAIL_COUNT} issue(s) found, ${WARN_COUNT} warning(s)."
 exit 1
