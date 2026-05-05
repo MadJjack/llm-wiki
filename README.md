@@ -45,6 +45,31 @@ The script copies the wiki skeleton, `.agent/` planning system, agent prompts, a
 
 ---
 
+## What's Included
+
+The template ships with a starter wiki built around software development — ready to use immediately and extend as your project grows.
+
+### Engineering Patterns Library
+
+Six agent-readable pattern pages live in `wiki/patterns/`. Your agent uses these automatically when writing or reviewing code — no manual lookup required.
+
+| Pattern | When the agent uses it |
+|---|---|
+| [Clean Code Checklist](wiki/patterns/clean-code-checklist.md) | Before finishing any code edit or PR |
+| [Software Design Checklist](wiki/patterns/software-design-checklist.md) | Before refactoring, extracting abstractions, or adding modules |
+| [Design Patterns Decision Guide](wiki/patterns/design-patterns-decision-guide.md) | When choosing a structural pattern (Factory, Observer, Strategy, etc.) |
+| [Refactoring Checklist](wiki/patterns/refactoring-checklist.md) | Before and after any refactor pass |
+| [Legacy Code Safe Change](wiki/patterns/legacy-code-safe-change.md) | When touching code without full test coverage |
+| [Release Readiness Checklist](wiki/patterns/release-readiness-checklist.md) | Pre-release gate |
+
+All six are templates — customize them to match your stack, conventions, and team standards.
+
+### Starter Wiki Structure
+
+Beyond patterns, the wiki skeleton includes stub pages for architecture, API, data model, decisions (ADRs), modules, integrations, testing, lessons, troubleshooting, and setup. Your agent fills these in during `/wiki-onboard` and keeps them current as the project evolves.
+
+---
+
 ## Architecture
 
 ```
