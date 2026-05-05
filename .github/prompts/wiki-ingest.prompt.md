@@ -1,16 +1,16 @@
 ---
 name: "wiki-ingest"
-description: "Compile source material from raw/ into the wiki, using the provided target when available"
-argument-hint: "[raw/path.md or folder]"
+description: "Compile source material from wiki/raw/ into the wiki, using the provided target when available"
+argument-hint: "[wiki/raw/path.md or folder]"
 agent: agent
 ---
 
-Compile source material from `raw/` into the wiki.
+Compile source material from `wiki/raw/` into the wiki.
 
-1. If the user named a target, use it. If not, ask for a path under `raw/` or a small target set.
-2. Read only the source files under `raw/`. Never modify anything in `raw/`.
+1. If the user named a target, use it. If not, ask for a path under `wiki/raw/` or a small target set.
+2. Read only the source files under `wiki/raw/`. Never modify anything in `wiki/raw/`.
 3. Convert the source material into the appropriate `wiki/` pages with YAML frontmatter and `[[wikilinks]]`.
-4. Update `wiki/index.md` with any pages created or materially changed.
+4. Update `wiki/index.md` with any pages created or materially changed, including the Task Router if the new knowledge changes first-hop routing.
 5. Append one log entry per source file processed:
    `## [YYYY-MM-DD] ingest | <Source Title>`
    to `wiki/log.md`.

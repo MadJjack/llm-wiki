@@ -51,7 +51,7 @@ If you can't determine a convention confidently, leave the placeholder rather th
 
 ## Step 3 — Ingest Existing Docs
 
-List all files in `raw/`. For each file found (skip `raw/_readme.md`):
+List all files in `wiki/raw/`. For each file found (skip `wiki/raw/_readme.md`):
 
 1. Read it fully
 2. Extract the knowledge into appropriate wiki pages under `wiki/`
@@ -61,7 +61,7 @@ List all files in `raw/`. For each file found (skip `raw/_readme.md`):
    ## [YYYY-MM-DD] ingest | <Source Title>
    ```
 
-If `raw/` contains only `_readme.md` or is empty, skip this step.
+If `wiki/raw/` contains only `_readme.md` or is empty, skip this step.
 
 ---
 
@@ -96,7 +96,7 @@ If no schema files are found, set `status: draft` in the frontmatter and add a n
 
 ## Step 6 — Finalize Index and Log
 
-1. Update `wiki/index.md` — ensure every page you created or modified has an entry in the correct category table.
+1. Update `wiki/index.md` — ensure every page you created or modified has an entry in the correct category table and that the Task Router points to the useful first-hop pages for this repo.
 2. Append to `wiki/log.md`:
    ```
    ## [YYYY-MM-DD] ingest | Onboard — initial wiki population
@@ -107,7 +107,7 @@ If no schema files are found, set `status: draft` in the frontmatter and add a n
 
 ## Rules
 
-- Never modify files in `raw/` — read only.
+- Never modify files in `wiki/raw/` — read only.
 - Use `[[wikilinks]]` for all internal cross-references in wiki pages.
 - Set `status: current` on pages you filled in; leave `status: draft` on pages you couldn't populate.
 - Do not invent information — if you can't determine something from the repo, leave the placeholder.

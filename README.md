@@ -9,15 +9,18 @@ extended for software development workflows.
 ## Architecture
 
 ```
-raw/          ← Immutable source material. Agent reads; never modifies.
-wiki/         ← Compiled knowledge base. Agent owns this entirely.
-CLAUDE.md     ← Agent schema. Read first, always.
-CONVENTIONS.md← Code style and stack decisions. Agent reads before writing code.
-compiled/     ← Generated artifacts from wiki queries.
+wiki/                 ← Project knowledge workspace.
+├── raw/              ← Immutable source material. Agent reads; never modifies.
+├── compiled/         ← Generated artifacts from wiki queries.
+└── **/*.md           ← Compiled knowledge base. Agent owns this, except raw/.
+CLAUDE.md             ← Agent schema. Read first, always.
+CONVENTIONS.md        ← Code style and stack decisions. Agent reads before writing code.
 
 .agent/
 ├── context.md        ← Hot cache. Rewritten at end of every session.
-├── decisions.md      ← Micro-decisions log. Append-only.
+├── decisions.md      ← Legacy micro-decisions log. Append-only.
+├── decisions/        ← {N}.{plan-name}.md per-plan micro-decisions
+│   └── archive/
 ├── plans/            ← {N}.{plan-name}.md
 │   └── archive/
 └── progresses/       ← {N}.{plan-name}.md  ← same filename as matching plan
@@ -28,21 +31,24 @@ PROGRESS.md   ← Master tracker. Updated when plans are created or completed.
 
 ---
 
-## Plan / Progress Pairing
+## Plan / Progress / Decision Trio
 
-Plans and progress files are always a matched pair with identical filenames:
+New plans, progress files, and per-plan micro-decision files are a matched trio with identical filenames:
 
 ```
 .agent/plans/1.auth-setup.md
 .agent/progresses/1.auth-setup.md
+.agent/decisions/1.auth-setup.md
 ```
+
+The root `.agent/decisions.md` file is retained as legacy history for older plans; new work should log micro-decisions in the matching file under `.agent/decisions/`.
 
 ---
 
 ## Development Flow
 
 ```
-1. Plan      → .agent/plans/{N}.{name}.md
+1. Plan      → .agent/plans/{N}.{name}.md + .agent/progresses/{N}.{name}.md + .agent/decisions/{N}.{name}.md
 2. Build     → execute, following CONVENTIONS.md
 3. Validate  → run the validation tests defined in the plan
 4. Iterate   → fix failures, re-validate
@@ -64,7 +70,7 @@ Plans and progress files are always a matched pair with identical filenames:
 
 | Operation | Trigger | What happens |
 |---|---|---|
-| **Ingest** | "Ingest raw/file.md" | Source → wiki pages + index + log |
+| **Ingest** | "Ingest wiki/raw/file.md" | Source → wiki pages + index + log |
 | **Query** | Any codebase question | wiki/index → pages → answer with citations |
 | **Lint** | "Lint the wiki" | Find orphans, contradictions, stale pages |
 
@@ -79,6 +85,8 @@ wiki/
 ├── index.md           ← Master catalog — agent reads first on every query
 ├── log.md             ← ## [YYYY-MM-DD] operation | description
 ├── glossary.md
+├── raw/               ← Immutable source material for ingest
+├── compiled/          ← Generated query artifacts
 ├── architecture/      ← System design, data flow
 ├── api/               ← HTTP endpoints, contracts
 ├── data-model/        ← Schema, entities, migrations
@@ -149,7 +157,7 @@ This repo combines local shell scripts for bootstrap and validation with chat co
 | Command | Use |
 |---|---|
 | `bash scripts/onboard.sh` | Bootstrap the local clone and prepare agent state |
-| `bash scripts/validate-wiki.sh` | Structural repo check for required files, mirror sync, plan/progress pairing, wiki frontmatter, and Symptom Index wiring |
+| `bash scripts/validate-wiki.sh` | Structural repo check for required files, mirror sync, plan/progress/decision pairing and template structure, wiki frontmatter, Symptom Index wiring, and broken wikilinks in `wiki/` |
 | `bash scripts/reset-template-state.sh` | Maintainer-only reset back to the clean template baseline |
 
 ### Agent Workflows
@@ -158,7 +166,7 @@ This repo combines local shell scripts for bootstrap and validation with chat co
 |---|---|
 | `/wiki-onboard` | Populate the wiki skeleton from the current repo. |
 | `/wiki-lint` | Run a report-only wiki health check. |
-| `/wiki-ingest` | Compile source docs from `raw/` into wiki pages. |
+| `/wiki-ingest` | Compile source docs from `wiki/raw/` into wiki pages. |
 | `/wiki-query` | Answer repo questions from the wiki first. |
 | `/wiki-plan-new` | Create and activate a new numbered plan. |
 | `/wiki-plan-close` | Validate, archive, and close a finished plan. |
@@ -186,7 +194,7 @@ This repo combines local shell scripts for bootstrap and validation with chat co
 2. Run `/wiki-onboard` once for a new project or when the wiki is still mostly stubbed.
 3. Use `/wiki-query` for normal codebase questions so answers come from the wiki first.
 4. Use `/wiki-plan-new` before non-trivial work and `/wiki-plan-close` when the plan is validated and done.
-5. Use `/wiki-ingest` when you add source docs under `raw/`, `/wiki-lint` when you want a report-only health check, and `bash scripts/validate-wiki.sh` before wrapping up larger structural changes.
+5. Use `/wiki-ingest` when you add source docs under `wiki/raw/`, `/wiki-lint` when you want a report-only health check, and `bash scripts/validate-wiki.sh` before wrapping up larger structural changes.
 
 ---
 
@@ -201,7 +209,8 @@ The schema is built around a clean shared-vs-personal split. Anyone can clone th
 | `PROGRESS.md` | Shared | Master plan tracker — the team-wide "where are we" file. |
 | `.agent/plans/*.md` | Shared | The work itself, numbered and committed. |
 | `.agent/progresses/*.md` | Shared | Status of each plan, paired by filename. |
-| `.agent/decisions.md` | Shared | Append-only micro-decisions log. |
+| `.agent/decisions/*.md` | Shared | Per-plan micro-decisions, paired by filename for new work. |
+| `.agent/decisions.md` | Shared | Legacy append-only micro-decisions log. |
 | `CLAUDE.md` / `AGENTS.md` / `.github/copilot-instructions.md` | Shared | Agent schema; mirrors stay in sync. |
 | `.agent/context.md` | Personal, gitignored | Each developer's own hot cache. |
 | `.agent/context.md.example` | Shared | Template the agent copies on first run. |
@@ -209,8 +218,8 @@ The schema is built around a clean shared-vs-personal split. Anyone can clone th
 **Team bootstrap:** a new clone should run `bash scripts/onboard.sh`, not manually copy `.agent/context.md.example`. The script handles the local context file, `.gitignore`, and required-file check in one place.
 
 **Practical team rules:**
-- Use `PROGRESS.md` plus the matching plan/progress pair as the shared source of truth.
-- Take the next plan number from `PROGRESS.md` and add the plan, progress file, and tracker row in the same change.
+- Use `PROGRESS.md` plus the matching plan/progress/decision trio as the shared source of truth.
+- Take the next plan number from `PROGRESS.md` and add the plan, progress file, decision file, and tracker row in the same change.
 - Keep wiki edits, plan updates, and decision logs append-oriented rather than rewriting pages from scratch.
 
 ---

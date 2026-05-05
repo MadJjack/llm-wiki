@@ -6,12 +6,13 @@ allowed-tools: Read Write Bash
 
 Run a report-only lint for this repository's wiki.
 
-1. Read `wiki/index.md` first, including the Symptom Index and every category table.
+1. Read `wiki/index.md` first, including the Symptom Index, Task Router, and every category table.
 2. Check the wiki for Rule 3 and Rule 6 issues:
    - contradictions or stale claims
    - orphan pages, missing cross-links, or obvious concept gaps
    - files listed in `wiki/index.md` that do not exist
    - wiki pages that exist but are missing from `wiki/index.md`
+   - Task Router rows with stale routing, missing targets, or task shapes that no longer match the wiki
    - troubleshooting or lesson pages without a Symptom Index row
    - Symptom Index rows pointing at missing pages
    - empty or placeholder symptom strings

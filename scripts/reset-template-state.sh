@@ -20,6 +20,7 @@ write_progress_baseline() {
 
 > Master project progress tracker. The agent reads this to understand where the project stands.
 > Detailed per-plan progress lives in `.agent/progresses/`.
+> New per-plan micro-decisions live in `.agent/decisions/`; `.agent/decisions.md` is legacy history.
 > Update this file when plans are created or completed.
 
 ## Convention
@@ -34,9 +35,9 @@ write_progress_baseline() {
 
 ## Active Plans
 
-| # | Plan | Status | Progress File |
-|---|---|---|---|
-| — | No active plans | — | — |
+| # | Plan | Status | Progress File | Decision File |
+|---|---|---|---|---|
+| — | No active plans | — | — | — |
 
 ---
 
@@ -63,11 +64,12 @@ EOF
 
 write_decisions_baseline() {
   cat <<'EOF' > "$REPO_ROOT/.agent/decisions.md"
-# Micro-Decisions Log
+# Legacy Micro-Decisions Log
 
-> Append-only log of small decisions made during build work.
+> Append-only log of small decisions made before per-plan decision files.
+> New work logs micro-decisions in `.agent/decisions/{N}.{plan-name}.md`.
 > For significant architectural choices, use wiki/decisions/ (ADRs) instead.
-> This captures the "why" behind day-to-day implementation choices.
+> This file is retained as legacy history.
 
 **When to log here vs. wiki/decisions/:**
 - Here: "used debounce(300) because lower values caused flickering on slow connections"
@@ -100,12 +102,14 @@ EOF
 remove_plan_history() {
   find "$REPO_ROOT/.agent/plans" -maxdepth 1 -type f -name '*.md' ! -name '_template.md' -delete
   find "$REPO_ROOT/.agent/progresses" -maxdepth 1 -type f -name '*.md' ! -name '_template.md' -delete
+  find "$REPO_ROOT/.agent/decisions" -maxdepth 1 -type f -name '*.md' ! -name '_template.md' -delete
   find "$REPO_ROOT/.agent/plans/archive" -maxdepth 1 -type f ! -name '.gitkeep' -delete
   find "$REPO_ROOT/.agent/progresses/archive" -maxdepth 1 -type f ! -name '.gitkeep' -delete
+  find "$REPO_ROOT/.agent/decisions/archive" -maxdepth 1 -type f ! -name '.gitkeep' -delete
 }
 
 ensure_archive_placeholders() {
-  mkdir -p "$REPO_ROOT/.agent/plans/archive" "$REPO_ROOT/.agent/progresses/archive"
+  mkdir -p "$REPO_ROOT/.agent/plans/archive" "$REPO_ROOT/.agent/progresses/archive" "$REPO_ROOT/.agent/decisions/archive"
 
   if [ ! -f "$REPO_ROOT/.agent/plans/archive/.gitkeep" ]; then
     : > "$REPO_ROOT/.agent/plans/archive/.gitkeep"
@@ -113,6 +117,10 @@ ensure_archive_placeholders() {
 
   if [ ! -f "$REPO_ROOT/.agent/progresses/archive/.gitkeep" ]; then
     : > "$REPO_ROOT/.agent/progresses/archive/.gitkeep"
+  fi
+
+  if [ ! -f "$REPO_ROOT/.agent/decisions/archive/.gitkeep" ]; then
+    : > "$REPO_ROOT/.agent/decisions/archive/.gitkeep"
   fi
 }
 
@@ -126,13 +134,13 @@ write_decisions_baseline
 write_log_baseline
 pass "Baseline tracker files restored"
 
-info "Removing non-template plan and progress history"
+info "Removing non-template plan, progress, and per-plan decision history"
 ensure_archive_placeholders
 remove_plan_history
-pass "Plan/progress history removed"
+pass "Plan/progress/per-plan decision history removed"
 
 echo ""
 echo "──────────────────────────────────────"
 echo -e "${BOLD}${GREEN}Template reset complete.${RESET}"
 echo "Run: bash scripts/validate-wiki.sh"
-echo "Then confirm the repo contains no maintainer-specific plan, decision, or log history."
+echo "Then confirm the repo contains no maintainer-specific plan, progress, per-plan decision, legacy decision, or log history."

@@ -1,8 +1,9 @@
-# Micro-Decisions Log
+# Legacy Micro-Decisions Log
 
-> Append-only log of small decisions made during build work.
+> Append-only log of small decisions made before per-plan decision files.
+> New work logs micro-decisions in `.agent/decisions/{N}.{plan-name}.md`.
 > For significant architectural choices, use wiki/decisions/ (ADRs) instead.
-> This captures the "why" behind day-to-day implementation choices.
+> This file is retained as legacy history.
 
 **When to log here vs. wiki/decisions/:**
 - Here: "used debounce(300) because lower values caused flickering on slow connections"

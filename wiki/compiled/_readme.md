@@ -1,4 +1,4 @@
-# compiled/
+# wiki/compiled/
 
 Point-in-time artifacts generated from wiki queries.
 Not wiki pages — outputs like reports, comparison tables, slide decks.

@@ -1,9 +1,9 @@
 ---
 type: setup
 tags: []
-created: <!-- YYYY-MM-DD -->
-updated: <!-- YYYY-MM-DD -->
-status: draft
+created: 2026-05-04
+updated: 2026-05-04
+status: current
 ---
 
 # Dev Environment Setup
@@ -17,6 +17,20 @@ status: draft
 ```bash
 # Agent fills this in
 ```
+
+## Obsidian Vault
+
+Open this folder as the Obsidian vault:
+
+```text
+/Users/jacquespaul/Dev/llm-wiki/wiki
+```
+
+Do not open the repository root as the vault if you want the graph to resolve correctly. The wiki's internal links are written relative to `wiki/`, so a link such as `[[patterns/clean-code-checklist]]` resolves to `wiki/patterns/clean-code-checklist.md` only when `wiki/` is the vault root.
+
+Use `wiki/index.md` as the home note. In Obsidian, that note appears as `index.md` because the vault root is already `wiki/`.
+
+The global graph should show links between pages such as [[patterns/clean-code-checklist]], [[patterns/software-design-checklist]], and [[patterns/design-patterns-decision-guide]]. If the graph is noisy, use Obsidian's graph filters to exclude `raw/` and `compiled/`; those folders hold source material and generated artifacts rather than compiled knowledge pages.
 
 ## Environment Variables
 
@@ -35,3 +49,4 @@ status: draft
 
 ## Related
 - [[troubleshooting/_index]]
+- [[index]]

@@ -2,7 +2,7 @@
 type: troubleshooting
 tags: []
 created: 2026-04-26
-updated: 2026-04-26
+updated: 2026-05-04
 status: current
 ---
 
@@ -16,4 +16,8 @@ status: current
 > Symptom Index of `wiki/index.md`. See `CLAUDE.md` Rule 6.
 
 ## Pages
+| Page | Summary |
+|---|---|
+| [[troubleshooting/symptom-index-parser-task-router]] | Fix for validator failures caused by reading Task Router rows as Symptom Index entries |
+
 <!-- Agent adds entries here -->

@@ -8,23 +8,26 @@ a software repository. Read this file fully before doing anything else.
 ## Architecture
 
 ```
-raw/          ← Layer 1: Immutable source material. Read only; never modify.
-wiki/         ← Layer 2: Compiled knowledge base. You own this entirely.
-CLAUDE.md     ← Layer 3: This schema. Defines your behavior.
-compiled/     ← Generated artifacts from queries (reports, comparisons, decks).
+wiki/                 ← Project knowledge workspace.
+├── raw/              ← Layer 1: Immutable source material. Read only; never modify.
+├── compiled/         ← Generated artifacts from queries (reports, comparisons, decks).
+└── **/*.md           ← Layer 2: Compiled knowledge base. You own this, except raw/.
+CLAUDE.md             ← Layer 3: This schema. Defines your behavior.
 
 .agent/
 ├── context.md        ← Hot cache (per-developer, gitignored). Bootstrapped from context.md.example.
 ├── context.md.example← Committed template. Copy to context.md on first clone.
-├── decisions.md      ← Micro-decisions log. Append-only. Shared/committed.
+├── decisions.md      ← Legacy micro-decisions log. Append-only. Shared/committed.
+├── decisions/        ← {N}.{plan-name}.md  Shared/committed per-plan micro-decisions.
 ├── plans/            ← {N}.{plan-name}.md  Shared/committed.
 └── progresses/       ← {N}.{plan-name}.md  Shared/committed. Identical filename to matching plan.
 ```
 
-Plan and progress are always a matched pair by filename:
+Plan, progress, and per-plan decisions are always a matched trio by filename:
 ```
 .agent/plans/1.auth-setup.md
 .agent/progresses/1.auth-setup.md
+.agent/decisions/1.auth-setup.md
 ```
 
 ---
@@ -37,8 +40,8 @@ Do this at the start of every session, before anything else:
 2. Read `.agent/context.md` — understand current project state and active plan
 3. Read `CLAUDE.md` (this file)
 4. Read `CONVENTIONS.md` — know how code is written here
-5. Read `PROGRESS.md` — the team-shared tracker. If your local `context.md` is empty or stale, treat `PROGRESS.md` + the active plan/progress pair as the source of truth.
-6. If there's an active plan, read it and its progress file
+5. Read `PROGRESS.md` — the team-shared tracker. If your local `context.md` is empty or stale, treat `PROGRESS.md` + the active plan/progress/decision trio as the source of truth.
+6. If there's an active plan, read it, its progress file, and its matching `.agent/decisions/{N}.{plan-name}.md` file if present.
 7. Only then: respond to or begin the requested task
 
 ---
@@ -48,7 +51,7 @@ Do this at the start of every session, before anything else:
 Do this before ending every session:
 
 1. Update `.agent/context.md` — compress what happened into the hot cache
-2. Flush any pending ⚡ micro-decisions to `.agent/decisions.md`
+2. Flush any pending ⚡ micro-decisions to the matching `.agent/decisions/{N}.{plan-name}.md` file. For legacy plans without a decision file, use `.agent/decisions.md`.
 3. Flush any pending 📌 wiki updates
 4. **Bug-solved gate:** if this session solved a bug or learned a non-obvious
    lesson, confirm a troubleshooting/lesson page exists AND has a Symptom Index
@@ -65,13 +68,13 @@ Do this before ending every session:
 Every non-trivial task follows this sequence:
 
 ```
-1. Plan      → Create .agent/plans/{N}.{name}.md
+1. Plan      → Create .agent/plans/{N}.{name}.md, .agent/progresses/{N}.{name}.md, and .agent/decisions/{N}.{name}.md
 2. Build     → Execute the plan, following CONVENTIONS.md
 3. Validate  → Run the validation tests defined in the plan
 4. Iterate   → Fix failures, re-validate, repeat until all tests pass
 ```
 
-Update `.agent/progresses/{N}.{name}.md` throughout Build, Validate, and Iterate.
+Update `.agent/progresses/{N}.{name}.md` and `.agent/decisions/{N}.{name}.md` throughout Build, Validate, and Iterate.
 
 ---
 
@@ -85,10 +88,11 @@ gets you to the fix in one hop. See Rule 6.
 
 **Otherwise:**
 
-1. Read `wiki/index.md` to find relevant pages
-2. Read those pages
-3. Only scan source files if the wiki doesn't have the answer
-4. If the wiki is missing something important, add it after the task is done
+1. Read the **Task Router** in `wiki/index.md` to match the query shape
+2. Open the router's "Open First" page(s), then its "Then Read" page(s)
+3. If no router row fits, use the category tables in `wiki/index.md`
+4. Only scan source files if the wiki doesn't have the answer
+5. If the wiki is missing something important, add it after the task is done
 
 ---
 
@@ -113,9 +117,17 @@ If 🔴, stop and create numbered child plans before writing any code.
 - Sequential integer, lowercase hyphenated name
 - Examples: `1.auth-setup.md`, `2.document-ingestion.md`
 - Progress file uses **the exact same filename** in `.agent/progresses/`
+- Decision file uses **the exact same filename** in `.agent/decisions/` for new plans
 
 ### Plan Requirements
 
+- New plans MUST start by copying `.agent/plans/_template.md` to
+  `.agent/plans/{N}.{plan-name}.md`; new progress files MUST start by copying
+  `.agent/progresses/_template.md` to the matching progress path; new decision
+  files MUST start by copying `.agent/decisions/_template.md` to the matching
+  decision path.
+- Preserve every template metadata field and section heading. Fill in or replace
+  placeholder content, but do not remove required structure.
 - Detailed enough to execute without ambiguity
 - Every task must include at least one specific, verifiable validation test
 - Inter-plan dependencies declared at the top (`Depends on` / `Blocks`)
@@ -132,22 +144,23 @@ and note it as a ⚡ micro-decision.
 ## Rule 3 — The Three Wiki Operations
 
 ### Ingest
-> "Ingest raw/X" — compile a source file into the wiki
+> "Ingest wiki/raw/X" — compile a source file into the wiki
 
-1. Read the source in `raw/`
+1. Read the source in `wiki/raw/`
 2. Write or update relevant wiki pages with YAML frontmatter
 3. Update `wiki/index.md` — add new pages with one-line summary
 4. Append: `## [YYYY-MM-DD] ingest | Source Title` to `wiki/log.md`
 
-Never modify the original file in `raw/`.
+Never modify the original file in `wiki/raw/`.
 
 ### Query
 > Any question about the codebase, architecture, a module, or a concept
 
-1. Read `wiki/index.md` to identify relevant pages
-2. Read those pages and synthesize an answer with citations (→ wiki/page)
-3. If the answer is non-obvious and durable, offer to file it as a new wiki page
-4. Append: `## [YYYY-MM-DD] query | Question summary` to `wiki/log.md`
+1. Read `wiki/index.md` and use the Task Router to identify first-hop pages
+2. Read the routed pages and synthesize an answer with citations (→ wiki/page)
+3. Fall back to category tables and source files only when the routed pages are missing, stale, or ambiguous
+4. If the answer is non-obvious and durable, offer to file it as a new wiki page
+5. Append: `## [YYYY-MM-DD] query | Question summary` to `wiki/log.md`
 
 ### Lint
 > "Lint the wiki" — health check
@@ -156,6 +169,8 @@ Check for:
 - contradictions, stale claims (`status: stale` in frontmatter), orphan pages
   (no inbound links), missing cross-references, concepts without their own
   page, data gaps
+- Task Router rows with stale routing, missing targets, or task shapes that no
+  longer match the wiki
 - troubleshooting/lesson pages with no Symptom Index row in `wiki/index.md`,
   or Symptom Index rows pointing at missing pages
 - Symptom Index rows with empty or placeholder symptom strings
@@ -185,12 +200,15 @@ Always add YAML frontmatter to new wiki pages. Always update `wiki/index.md`.
 
 ## Rule 5 — Micro-Decisions
 
-During build work, log small implementation decisions to `.agent/decisions.md`.
+During build work, log small implementation decisions to the matching
+`.agent/decisions/{N}.{plan-name}.md` file. `.agent/decisions.md` is retained
+as legacy history for older plans and for plans that predate per-plan decision
+files.
 Format: `## [YYYY-MM-DD] #{plan-number} | Decision title`
 
 These are flagged with ⚡ in progress files during work, then flushed at session end.
 
-**Micro-decision (log here):** "Used 300ms debounce, lower caused flicker"
+**Micro-decision (log in the per-plan decision file):** "Used 300ms debounce, lower caused flicker"
 **ADR (use wiki/decisions/):** "Chose PostgreSQL over MongoDB"
 
 ---
@@ -312,6 +330,8 @@ Every such page MUST also register at least one row in the Symptom Index of
 | `wiki/api/` | HTTP endpoints, request/response shapes |
 | `wiki/data-model/` | Schema definitions, entities, migrations |
 | `wiki/testing/` | Test strategy, suites, conventions |
+| `wiki/raw/` | Immutable source material used for ingest |
+| `wiki/compiled/` | Generated reports, comparisons, decks, and other query artifacts |
 | `wiki/glossary.md` | Project-specific terms |
 | `wiki/index.md` | Master catalog — always keep current |
 | `wiki/log.md` | Append-only operation log |
@@ -320,7 +340,7 @@ Every such page MUST also register at least one row in the Symptom Index of
 
 ## What You Do Not Do
 
-- Do not modify files in `raw/` — ever
+- Do not modify files in `wiki/raw/` — ever
 - Do not rewrite wiki pages from scratch — append and update
 - Do not start building without a plan for ⚠️ Medium or 🔴 Complex tasks
 - Do not mark progress tasks `[x]` without running the validation test

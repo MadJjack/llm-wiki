@@ -2,6 +2,7 @@
 
 > Master project progress tracker. The agent reads this to understand where the project stands.
 > Detailed per-plan progress lives in `.agent/progresses/`.
+> New per-plan micro-decisions live in `.agent/decisions/`; `.agent/decisions.md` is legacy history.
 > Update this file when plans are created or completed.
 
 ## Convention
@@ -16,9 +17,9 @@
 
 ## Active Plans
 
-| # | Plan | Status | Progress File |
-|---|---|---|---|
-| — | No active plans | — | — |
+| # | Plan | Status | Progress File | Decision File |
+|---|---|---|---|---|
+| — | No active plans | — | — | — |
 
 ---
 

@@ -1,6 +1,7 @@
 # {N}. {Plan Name} — Progress
 
 **Plan:** `.agent/plans/{N}.{plan-name}.md`
+**Decisions:** `.agent/decisions/{N}.{plan-name}.md`
 **Started:** YYYY-MM-DD
 **Last updated:** YYYY-MM-DD
 **Status:** 🟡 In Progress | 🔴 Blocked | ✅ Done
@@ -64,7 +65,7 @@
 
 > Running log of findings and mid-task decisions. Newest at top.
 > Flag wiki-worthy items with 📌.
-> Flag micro-decisions with ⚡ (these go in .agent/decisions.md).
+> Flag micro-decisions with ⚡ (these go in the matching `.agent/decisions/{N}.{plan-name}.md` file).
 
 <!-- Format:
 ### YYYY-MM-DD
@@ -106,9 +107,9 @@
 - [ ] All validation tests passed and output recorded
 - [ ] All blockers resolved
 - [ ] All 📌 wiki updates made and logged above
-- [ ] All ⚡ micro-decisions logged in `.agent/decisions.md`
+- [ ] All ⚡ micro-decisions logged in the matching `.agent/decisions/{N}.{plan-name}.md`
 - [ ] Retrospective filled in
 - [ ] `wiki/log.md` updated
 - [ ] `PROGRESS.md` updated
 - [ ] `.agent/context.md` updated
-- [ ] Move both plan + progress to `archive/` folder
+- [ ] Move plan + progress + decision files to their `archive/` folders

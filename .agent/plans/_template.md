@@ -2,6 +2,7 @@
 
 **File:** `.agent/plans/{N}.{plan-name}.md`
 **Progress:** `.agent/progresses/{N}.{plan-name}.md`
+**Decisions:** `.agent/decisions/{N}.{plan-name}.md`
 **Created:** YYYY-MM-DD
 **Complexity:** ✅ Simple | ⚠️ Medium | 🔴 Complex
 

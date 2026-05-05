@@ -75,7 +75,7 @@ Before opening a pull request, confirm:
 - [ ] Mirror files re-synced if `CLAUDE.md` was modified (see above)
 - [ ] `wiki/index.md` updated if new wiki pages were added
 - [ ] `wiki/log.md` appended if an ingest, query, or lint operation occurred
-- [ ] No files in `raw/` were modified (immutable source layer)
+- [ ] No files in `wiki/raw/` were modified (immutable source layer)
 - [ ] No secrets, tokens, or personal data included
 
 ---
