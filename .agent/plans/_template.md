@@ -4,6 +4,8 @@
 **Progress:** `.agent/progresses/{N}.{plan-name}.md`
 **Decisions:** `.agent/decisions/{N}.{plan-name}.md`
 **Created:** YYYY-MM-DD
+**Author:** <!-- developer name who wrote this plan -->
+**Contributors:** <!-- comma-separated names of others who contributed; update as the team changes -->
 **Complexity:** ✅ Simple | ⚠️ Medium | 🔴 Complex
 
 > **Single-pass feasibility:** Yes / No — [one sentence justification]

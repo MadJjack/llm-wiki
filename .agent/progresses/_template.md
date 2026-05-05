@@ -4,7 +4,10 @@
 **Decisions:** `.agent/decisions/{N}.{plan-name}.md`
 **Started:** YYYY-MM-DD
 **Last updated:** YYYY-MM-DD
-**Status:** 🟡 In Progress | 🔴 Blocked | ✅ Done
+**Author:** <!-- developer who started this progress file -->
+**Contributors:** <!-- comma-separated names of others who took over or contributed; update on each handoff -->
+**Status:** 🟡 In Progress | 🔴 Blocked | ⏳ Awaiting Validation | ✅ Done
+**Status reason:** <!-- required when Blocked or Awaiting Validation: what is blocking, who needs to act, and what the success condition is -->
 
 ---
 
@@ -14,7 +17,8 @@
 |---|---|
 | `[ ]` | Not started |
 | `[-]` | In progress |
-| `[x]` | Completed |
+| `[x]` | Completed and validated |
+| `[~]` | Completed by agent; awaiting manual validation or external sign-off |
 
 ---
 
@@ -55,8 +59,10 @@
 ### Blocker: [title]
 **Task:** #N
 **Since:** YYYY-MM-DD
-**Description:** What is blocking.
-**Resolution:** Fill in when unblocked.
+**Status:** 🔴 Active | ✅ Resolved
+**Description:** What is blocking and why. Who needs to act.
+**Success condition:** What needs to be true for this blocker to be resolved.
+**Resolution:** Fill in when resolved — what changed and when.
 -->
 
 ---
@@ -103,8 +109,8 @@
 
 ## Completion Checklist
 
-- [ ] All tasks `[x]`
-- [ ] All validation tests passed and output recorded
+- [ ] All tasks `[x]` or `[~]` (with pending validations noted in Status reason)
+- [ ] All validation tests passed and output recorded (or `[~]` tasks have explicit sign-off instructions)
 - [ ] All blockers resolved
 - [ ] All 📌 wiki updates made and logged above
 - [ ] All ⚡ micro-decisions logged in the matching `.agent/decisions/{N}.{plan-name}.md`

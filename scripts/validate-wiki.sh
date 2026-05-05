@@ -429,7 +429,7 @@ check_progress_template_structure() {
       require_line "$file" "$rel" "$heading" "heading" || section_failed=1
     done
 
-    require_pattern "$file" "$rel" '^- \[[ x-]\] [0-9]+\. .+$' "numbered task checklist item" || section_failed=1
+    require_pattern "$file" "$rel" '^- \[[ x~-]\] [0-9]+\. .+$' "numbered task checklist item" || section_failed=1
     require_pattern "$file" "$rel" '^### Task [0-9]+ ' "validation result task section" || section_failed=1
   done < <(find "$REPO_ROOT/.agent/progresses" -type f -name "*.md" ! -name "_template.md" ! -path "*/archive/*" -print0)
 
