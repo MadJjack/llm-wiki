@@ -28,6 +28,7 @@ Last updated: 2026-05-04
 
 > For non-debug questions, use this table before scanning the category catalog.
 > For errors, stack fragments, or symptoms, use the Symptom Index above first.
+> **Second-hop narrowing:** after routing to first-hop pages, follow `relations.supports` and `relations.depends_on` links. Prefer `confidence: high` pages; flag `unverified` or `low` pages as uncertain.
 
 | Task / Query Shape | Open First | Then Read | Update Wiki When |
 |---|---|---|---|
@@ -79,6 +80,7 @@ Last updated: 2026-05-04
 | [[patterns/refactoring-checklist]] | Operational checklist for behavior-preserving code structure improvements |
 | [[patterns/release-readiness-checklist]] | Operational checklist for production-readiness review of runtime-affecting changes |
 | [[patterns/software-design-checklist]] | Operational software design checklist for agents before changing structure or abstractions |
+| [[patterns/metadata-model]] | Typed relation vocabulary and trust/provenance metadata model for wiki pages |
 <!-- Agent adds rows here -->
 
 ## Integrations

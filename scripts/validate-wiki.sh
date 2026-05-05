@@ -34,6 +34,22 @@ has_frontmatter_key() {
   ' "$file"
 }
 
+get_frontmatter_value() {
+  local file="$1"
+  local key="$2"
+
+  awk -v target="${key}:" '
+    NR == 1 { next }
+    $0 == "---" { exit }
+    index($0, target) == 1 {
+      val = substr($0, length(target) + 2)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", val)
+      print val
+      exit
+    }
+  ' "$file"
+}
+
 active_symptom_index_rows() {
   awk '
     /^## Symptom Index$/ { in_section = 1; next }
@@ -96,7 +112,7 @@ normalize_wikilink_target() {
 
 should_skip_wikilink_target() {
   case "$1" in
-    ""|"ADR-XXX"|"link")
+    ""|"ADR-XXX"|"link"|"wikilink"|"wikilinks"|"target")
       return 0
       ;;
   esac
@@ -574,6 +590,122 @@ check_symptom_index() {
   fi
 }
 
+check_wiki_trust_metadata() {
+  local section_failed=0
+  local file
+  local rel
+  local page_type
+  local confidence
+  local verify_method
+
+  info "Checking wiki trust metadata"
+
+  while IFS= read -r -d '' file; do
+    rel="${file#$REPO_ROOT/}"
+
+    case "$rel" in
+      "wiki/index.md"|"wiki/log.md"|"wiki/raw/"*|"wiki/compiled/"*|"wiki/glossary.md")
+        continue
+        ;;
+    esac
+
+    case "$(basename "$file")" in
+      "_index.md")
+        continue
+        ;;
+    esac
+
+    page_type="$(get_frontmatter_value "$file" "type")"
+    case "$page_type" in
+      architecture|decision|integration|troubleshooting|lesson)
+        ;;
+      *)
+        continue
+        ;;
+    esac
+
+    for key in confidence verified_at verification_method; do
+      if ! has_frontmatter_key "$file" "$key"; then
+        fail "Missing trust metadata key '$key' in $rel (type: $page_type)"
+        section_failed=1
+      fi
+    done
+
+    confidence="$(get_frontmatter_value "$file" "confidence")"
+    case "$confidence" in
+      high|medium|low|unverified|"")
+        ;;
+      *)
+        fail "Invalid confidence value '$confidence' in $rel (expected: high|medium|low|unverified)"
+        section_failed=1
+        ;;
+    esac
+
+    verify_method="$(get_frontmatter_value "$file" "verification_method")"
+    case "$verify_method" in
+      manual-review|automated-test|live-observation|unverified|"")
+        ;;
+      *)
+        fail "Invalid verification_method value '$verify_method' in $rel (expected: manual-review|automated-test|live-observation|unverified)"
+        section_failed=1
+        ;;
+    esac
+  done < <(find "$REPO_ROOT/wiki" -type f -name "*.md" -print0)
+
+  if [ "$section_failed" -eq 0 ]; then
+    pass "Wiki trust metadata is present and valid"
+  fi
+}
+
+check_wiki_relations() {
+  local section_failed=0
+  local file
+  local rel
+  local invalid_keys
+
+  info "Checking wiki relation type keys"
+
+  while IFS= read -r -d '' file; do
+    rel="${file#$REPO_ROOT/}"
+
+    case "$rel" in
+      "wiki/index.md"|"wiki/log.md"|"wiki/raw/"*|"wiki/compiled/"*)
+        continue
+        ;;
+    esac
+
+    if ! has_frontmatter_key "$file" "relations"; then
+      continue
+    fi
+
+    invalid_keys="$(awk '
+      NR == 1 { next }
+      $0 == "---" { exit }
+      /^relations:/ { in_relations = 1; next }
+      in_relations && /^[^ ]/ { exit }
+      in_relations && /^  [a-z]/ {
+        line = $0
+        gsub(/^[[:space:]]+/, "", line)
+        sub(/:.*$/, "", line)
+        if (line != "supports" && line != "depends_on" && line != "supersedes" && line != "contradicts" && line != "related_to") {
+          print line
+        }
+      }
+    ' "$file")"
+
+    if [ -n "$invalid_keys" ]; then
+      while IFS= read -r key; do
+        fail "Invalid relation type key '$key' in $rel (allowed: supports|depends_on|supersedes|contradicts|related_to)"
+        section_failed=1
+      done <<< "$invalid_keys"
+    fi
+  done < <(find "$REPO_ROOT/wiki" -type f -name "*.md" -print0)
+
+  if [ "$section_failed" -eq 0 ]; then
+    pass "Wiki relation type keys are valid"
+  fi
+}
+
 check_wikilinks() {
   local section_failed=0
   local entry
@@ -617,6 +749,8 @@ check_plan_template_structure
 check_progress_template_structure
 check_decision_template_structure
 check_wiki_frontmatter
+check_wiki_trust_metadata
+check_wiki_relations
 check_symptom_index
 check_wikilinks
 

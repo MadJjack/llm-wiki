@@ -4,6 +4,16 @@ tags: []
 created: <!-- YYYY-MM-DD -->
 updated: <!-- YYYY-MM-DD -->
 status: draft
+relations:
+  supports: []
+  depends_on: []
+  supersedes: []
+  contradicts: []
+  related_to: []
+confidence: unverified
+verified_at: <!-- YYYY-MM-DD -->
+verification_method: unverified
+owner: ""
 ---
 
 # ADR-000 — Decision Title

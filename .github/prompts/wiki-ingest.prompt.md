@@ -9,7 +9,7 @@ Compile source material from `wiki/raw/` into the wiki.
 
 1. If the user named a target, use it. If not, ask for a path under `wiki/raw/` or a small target set.
 2. Read only the source files under `wiki/raw/`. Never modify anything in `wiki/raw/`.
-3. Convert the source material into the appropriate `wiki/` pages with YAML frontmatter and `[[wikilinks]]`.
+3. Convert the source material into the appropriate `wiki/` pages with YAML frontmatter and `[[wikilinks]]`. Fill `relations:`, `confidence`, `verified_at`, and `verification_method` — set `verified_at` from the source document's date; set `confidence: high` for authoritative primary sources, `medium` for summaries or secondary sources.
 4. Update `wiki/index.md` with any pages created or materially changed, including the Task Router if the new knowledge changes first-hop routing.
 5. Append one log entry per source file processed:
    `## [YYYY-MM-DD] ingest | <Source Title>`

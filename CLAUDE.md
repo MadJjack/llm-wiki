@@ -148,8 +148,9 @@ and note it as a ⚡ micro-decision.
 
 1. Read the source in `wiki/raw/`
 2. Write or update relevant wiki pages with YAML frontmatter
-3. Update `wiki/index.md` — add new pages with one-line summary
-4. Append: `## [YYYY-MM-DD] ingest | Source Title` to `wiki/log.md`
+3. Fill `relations:`, `confidence`, `verified_at`, and `verification_method` — set `verified_at` from source date, `confidence` from source quality (authoritative primary source → `high`; summary or secondary → `medium`)
+4. Update `wiki/index.md` — add new pages with one-line summary
+5. Append: `## [YYYY-MM-DD] ingest | Source Title` to `wiki/log.md`
 
 Never modify the original file in `wiki/raw/`.
 
@@ -175,6 +176,9 @@ Check for:
   or Symptom Index rows pointing at missing pages
 - Symptom Index rows with empty or placeholder symptom strings
 - `affects:` values in frontmatter that don't match any `wiki/modules/` page
+- pages of type architecture/decision/integration/troubleshooting/lesson missing
+  `confidence`, `verified_at`, or `verification_method` trust metadata
+- `relations:` entries whose wikilink targets do not resolve
 
 Produce a report. Ask the human which fixes to apply.
 Append: `## [YYYY-MM-DD] lint | N issues found` to `wiki/log.md`
@@ -242,6 +246,51 @@ paste in.
 
 ---
 
+## Rule 7 — Typed Relations & Trust Metadata
+
+Every wiki page MAY carry `relations:` (typed semantic links) and SHOULD carry
+trust metadata fields (`confidence`, `verified_at`, `verification_method`, `owner`).
+Pages of type `architecture`, `decision`, `integration`, `troubleshooting`, and
+`lesson` MUST carry `confidence`, `verified_at`, and `verification_method` — the
+validator enforces this.
+
+### Relation type vocabulary
+
+| Key | Meaning |
+|---|---|
+| `supports` | This page provides evidence or rationale for the target |
+| `depends_on` | This page's claims rely on the target being true |
+| `supersedes` | This page replaces the target (target should be marked stale) |
+| `contradicts` | This page conflicts with the target — review required |
+| `related_to` | General non-directional association |
+
+Use `[[wikilink]]` syntax for target values. Wikilink targets must resolve to
+existing wiki files (the validator checks this).
+
+### Trust metadata fields
+
+| Field | Values | Meaning |
+|---|---|---|
+| `confidence` | `high \| medium \| low \| unverified` | How reliable is the content |
+| `verified_at` | `YYYY-MM-DD` | Last date a human or automated test confirmed accuracy |
+| `verification_method` | `manual-review \| automated-test \| live-observation \| unverified` | How it was checked |
+| `owner` | freeform string | Team, person, or agent accountable for the page |
+
+**When querying:** After routing via the Task Router, use `confidence` and
+`verified_at` to weight answers — prefer `high`-confidence pages and flag
+`low` or `unverified` pages as uncertain. Follow `relations.supports` and
+`relations.depends_on` to find corroborating pages.
+
+**When creating pages:** Set `confidence: unverified` and
+`verification_method: unverified` on first creation. Promote to `high` only
+after an explicit review or passing automated test.
+
+**When linting:** Flag pages of type architecture/decision/integration/
+troubleshooting/lesson that are missing trust metadata. Flag `relations:`
+entries whose targets do not resolve.
+
+---
+
 ## Wiki Page Format
 
 Every wiki page:
@@ -253,6 +302,16 @@ tags: []
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 status: current | stale | draft
+relations:
+  supports: []       # [[pages]] this page substantiates
+  depends_on: []     # [[pages]] that must be true for this to be valid
+  supersedes: []     # [[pages]] this page replaces
+  contradicts: []    # [[pages]] that conflict with this
+  related_to: []     # general associations
+confidence: high | medium | low | unverified
+verified_at: YYYY-MM-DD        # last confirmed by review or test
+verification_method: manual-review | automated-test | live-observation | unverified
+owner: ""                      # team or person accountable for this page
 ---
 
 # Page Title
@@ -274,6 +333,7 @@ status: current | stale | draft
 Use `[[wikilinks]]` for all internal cross-references.
 Update `updated:` in frontmatter whenever a page is modified.
 Set `status: stale` when a page needs review but you don't have time to fix it now.
+See Rule 7 for guidance on filling `relations:` and trust metadata fields.
 
 ### Troubleshooting & Lesson pages — extended format (AI-first retrieval)
 
@@ -291,6 +351,16 @@ triggers: []        # what causes it (deploy, migration, high load, etc.)
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 status: current | stale | draft
+relations:
+  supports: []
+  depends_on: []
+  supersedes: []
+  contradicts: []
+  related_to: []
+confidence: high | medium | low | unverified
+verified_at: YYYY-MM-DD
+verification_method: manual-review | automated-test | live-observation | unverified
+owner: ""
 ---
 
 # Page Title
@@ -311,7 +381,9 @@ status: current | stale | draft
 ```
 
 Every such page MUST also register at least one row in the Symptom Index of
-`wiki/index.md`. See Rule 6.
+`wiki/index.md`. See Rule 6. Trust metadata (`confidence`, `verified_at`,
+`verification_method`) is **required** on troubleshooting and lesson pages — the
+validator enforces this. See Rule 7.
 
 ---
 

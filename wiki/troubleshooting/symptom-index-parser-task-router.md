@@ -10,6 +10,16 @@ triggers: [adding a markdown table after the Symptom Index]
 created: 2026-05-04
 updated: 2026-05-04
 status: current
+relations:
+  supports: []
+  depends_on: []
+  supersedes: []
+  contradicts: []
+  related_to: []
+confidence: high
+verified_at: 2026-05-04
+verification_method: live-observation
+owner: ""
 ---
 
 # Symptom Index Parser Reads Task Router
