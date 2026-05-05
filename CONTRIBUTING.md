@@ -12,6 +12,19 @@ Thank you for your interest in contributing to LLM Wiki.
 
 ---
 
+## Key Scripts
+
+| Script | Purpose |
+|---|---|
+| `scripts/install.sh` | One-liner install into an existing project. Additive — never overwrites. |
+| `scripts/onboard.sh` | Per-clone bootstrap (context file, .gitignore, file check). Idempotent. |
+| `scripts/validate-wiki.sh` | Structural validator. Run before any PR. |
+| `scripts/reset-template-state.sh` | **Maintainer-only.** Wipes tracked history back to clean template baseline before publishing. |
+
+If you add or change a script, verify it is idempotent (safe to run twice) and exits non-zero on failure.
+
+---
+
 ## Mirror Files
 
 Three files in this repo are **mirrors** of `CLAUDE.md` and must never be edited directly:
@@ -77,6 +90,7 @@ Before opening a pull request, confirm:
 - [ ] `wiki/log.md` appended if an ingest, query, or lint operation occurred
 - [ ] No files in `wiki/raw/` were modified (immutable source layer)
 - [ ] No secrets, tokens, or personal data included
+- [ ] If `scripts/install.sh` was modified, tested in a clean empty directory
 
 ---
 

@@ -1,8 +1,47 @@
-# LLM Wiki — Developer Knowledge System
+# LLM Wiki
 
-A self-maintaining knowledge base and planning system for software repositories.
-Based on the [Karpathy LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f),
-extended for software development workflows.
+**A self-maintaining second brain for your codebase.**
+
+Your AI agent reads it, writes to it, and routes every question through it — so knowledge accumulates instead of evaporating between sessions. Based on the [Karpathy LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f), extended for software development workflows.
+
+Works with GitHub Copilot, Claude Code, Codex, and any agent that reads markdown.
+
+---
+
+## Get Started
+
+### New project — use this repo as a GitHub template
+
+Click **"Use this template"** at the top of this page, or:
+
+[![Use this template](https://img.shields.io/badge/Use_this_template-2ea44f?style=for-the-badge&logo=github)](https://github.com/MadJjack/llm-wiki/generate)
+
+Then run local setup inside your new repo:
+
+```bash
+bash scripts/onboard.sh
+```
+
+### Existing project — install into your repo
+
+Run this from your project root:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/MadJjack/llm-wiki/main/scripts/install.sh | bash
+```
+
+The script copies the wiki skeleton, `.agent/` planning system, agent prompts, and scripts into your repo — **without overwriting any existing files**. Then run your agent's `/wiki-onboard` command to fill in project-specific knowledge.
+
+<details>
+<summary>Manual install (without curl)</summary>
+
+1. Download and unzip this repo: [llm-wiki-main.zip](https://github.com/MadJjack/llm-wiki/archive/refs/heads/main.zip)
+2. Copy `wiki/`, `.agent/`, `scripts/`, `.github/prompts/`, `.github/agents/`, `CLAUDE.md`, `AGENTS.md`, `CONVENTIONS.md`, and `PROGRESS.md` into your project root.
+3. Add `.agent/context.md` to your `.gitignore`.
+4. Run `bash scripts/onboard.sh` to bootstrap your local agent context.
+5. Run `/wiki-onboard` in your agent.
+
+</details>
 
 ---
 
@@ -113,38 +152,36 @@ status: current | stale | draft
 
 ---
 
-## Getting Started
+## After Installing
 
-Setup is intentionally two-phase: first bootstrap the clone locally, then run repo onboarding in your agent.
-
-**Step 1 — Local bootstrap** (run once per clone):
+**Step 1 — Local bootstrap** (run once per clone, or right after `install.sh`):
 
 ```bash
 bash scripts/onboard.sh
 ```
 
-`scripts/onboard.sh` is an idempotent first-run setup script that bootstraps `.agent/context.md`, ensures that file stays ignored in `.gitignore`, verifies the required repo files exist, and then points you to the onboarding command.
+Bootstraps `.agent/context.md`, patches `.gitignore`, and verifies required files.
 
 **Step 2 — Repo onboarding** (run once per project):
 
-| Agent | How to run onboarding |
+| Agent | How to run |
 |---|---|
 | GitHub Copilot | Open Copilot Chat and type `/wiki-onboard` |
 | Claude Code | Open Claude Code and type `/wiki-onboard` |
-| Codex / other agents | Paste the contents of `.github/prompts/wiki-onboard.prompt.md` into chat |
+| Codex / other agents | Paste `.github/prompts/wiki-onboard.prompt.md` into chat |
 
-The onboarding pass fills in the starter project knowledge from the actual repo, including:
+The onboarding pass fills in starter project knowledge from your actual repo:
 - `wiki/architecture/overview.md`
 - `CONVENTIONS.md`
 - `wiki/setup/dev-environment.md`
-- `wiki/data-model/_index.md` when schema files exist
+- `wiki/data-model/_index.md` (when schema files exist)
 - `wiki/log.md`
 
 **What good looks like after onboarding:**
-- `bash scripts/onboard.sh` has created `.agent/context.md` locally and kept it untracked
-- `/wiki-onboard` has started replacing placeholders in `CONVENTIONS.md` and the wiki starter pages
+- `.agent/context.md` exists locally and is gitignored
+- `CONVENTIONS.md` and wiki starter pages have project-specific content
 - `bash scripts/validate-wiki.sh` passes
-- Shared truth lives in the tracked wiki, progress, and plan files, while personal working memory lives in each developer’s local, gitignored hot cache
+- Shared truth lives in the tracked wiki, progress, and plan files; personal working memory lives in each developer's local, gitignored hot cache
 
 ---
 
@@ -156,6 +193,7 @@ This repo combines local shell scripts for bootstrap and validation with chat co
 
 | Command | Use |
 |---|---|
+| `curl -sSL https://raw.githubusercontent.com/MadJjack/llm-wiki/main/scripts/install.sh \| bash` | Install the wiki skeleton into an existing project (additive, no overwrites) |
 | `bash scripts/onboard.sh` | Bootstrap the local clone and prepare agent state |
 | `bash scripts/validate-wiki.sh` | Structural repo check for required files, mirror sync, plan/progress/decision pairing and template structure, wiki frontmatter, Symptom Index wiring, and broken wikilinks in `wiki/` |
 | `bash scripts/reset-template-state.sh` | Maintainer-only reset back to the clean template baseline |
