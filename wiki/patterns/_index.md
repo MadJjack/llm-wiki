@@ -2,8 +2,18 @@
 type: pattern
 tags: []
 created: 2026-05-03
-updated: 2026-05-03
+updated: 2026-05-05
 status: current
+relations:
+  supports: []
+  depends_on: []
+  supersedes: []
+  contradicts: []
+  related_to: []
+confidence: unverified
+verified_at: 2026-05-05
+verification_method: unverified
+owner: ""
 ---
 
 # Patterns
